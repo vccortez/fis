@@ -7,7 +7,9 @@ function create_engine()
   local function term_to_string(self)
     local str = {}
 
-    table.insert(str, ('  - term: %s'):format(self.name))
+    table.insert(str, ('term %q'):format(self.name))
+    table.insert(str, ('membership function: %s'):format(self.mf('name')))
+    table.insert(str, ('parameters: %s'):format(table.concat(self.params, ', ')))
 
     return table.concat(str, '\n')
   end
@@ -29,8 +31,8 @@ function create_engine()
   local function variable_to_string(self)
     local str = {}
 
-    table.insert(str, (' - input variable %q'):format(self.name))
-    table.insert(str, ('  - range [%d-%d]'):format(self.min, self.max))
+    table.insert(str, ('variable %q'):format(self.name))
+    table.insert(str, ('range: [%d-%d]'):format(self.min, self.max))
     for _, v in pairs(self.terms) do table.insert(str, v:toString()) end
 
     return table.concat(str, '\n')
@@ -58,11 +60,11 @@ function create_engine()
   local function engine_to_string()
     local str = {}
 
-    table.insert(str, '- fuzzy inference system')
-    table.insert(str, (' - number of inputs:  %s'):format(#this.inputs))
-    table.insert(str, (' - number of outputs: %s'):format(#this.outputs))
+    table.insert(str, 'fuzzy inference system')
+    table.insert(str, ('number of inputs: %s'):format(#this.inputs))
     for _, v in ipairs(this.inputs) do table.insert(str, v:toString()) end
-    for _, v in ipairs(this.outputs) do table.insert(str, v:toString()) end
+    table.insert(str, ('number of outputs: %s'):format(#this.outputs))
+    for i, v in ipairs(this.outputs) do table.insert(str, v:toString()) end
 
     return table.concat(str, '\n')
   end
