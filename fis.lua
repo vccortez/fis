@@ -4,27 +4,36 @@ function create_engine()
     outputs = {},
   }
 
-  local function variable_add_term(variable_table)
-    return function(self, name, mf, params)
-      local input = self
-      local term  = {}
+  local function term_to_string(self)
+    local str = {}
 
-      term.name   = name
-      term.mf     = mf
-      term.params = params
+    table.insert(str, ('  - term: %s'):format(self.name))
 
-      variable_table.terms[term.name] = term
-
-      return term
-    end
+    return table.concat(str, '\n')
   end
 
-  local function variable_list_terms(self)
+  local function variable_add_term(self, name, mf, params)
     local input = self
+    local term  = {}
 
-    for _, i in pairs(kind) do
-      io.write(i.name .. '\n')
-    end
+    term.name   = name
+    term.mf     = mf
+    term.params = params
+    term.toString = term_to_string
+
+    input.terms[term.name] = term
+
+    return input
+  end
+
+  local function variable_to_string(self)
+    local str = {}
+
+    table.insert(str, (' - input variable %q'):format(self.name))
+    table.insert(str, ('  - range [%d-%d]'):format(self.min, self.max))
+    for _, v in pairs(self.terms) do table.insert(str, v:toString()) end
+
+    return table.concat(str, '\n')
   end
 
   local function engine_add_variable(variable_table)
@@ -39,26 +48,29 @@ function create_engine()
       table.insert(variable_table, var)
       variable_table[var.name] = var
 
-      var.addTerm   = variable_add_term(variable_table)
-      var.listTerms = variable_list_terms
+      var.addTerm  = variable_add_term
+      var.toString = variable_to_string
 
       return var
     end
   end
 
-  local function engine_list_variables(variable_table)
-    return function()
-      for _, i in ipairs(variable_table) do
-        io.write(i.name .. '\n')
-      end
-    end
+  local function engine_to_string()
+    local str = {}
+
+    table.insert(str, '- fuzzy inference system')
+    table.insert(str, (' - number of inputs:  %s'):format(#this.inputs))
+    table.insert(str, (' - number of outputs: %s'):format(#this.outputs))
+    for _, v in ipairs(this.inputs) do table.insert(str, v:toString()) end
+    for _, v in ipairs(this.outputs) do table.insert(str, v:toString()) end
+
+    return table.concat(str, '\n')
   end
 
   return {
     addInput = engine_add_variable(this.inputs),
     addOutput = engine_add_variable(this.outputs),
-    listInputs = engine_list_variables(this.inputs),
-    listOutputs = engine_list_variables(this.outputs),
+    toString = engine_to_string,
   }
 end
 
