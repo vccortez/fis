@@ -13,7 +13,7 @@ local function trapezoidal(x, params)
 
   local a, b, c, d = table.unpack(params, 1, 4)
 
-  return u.max({0, u.min({ (x - a)/(b - a), 1, (d - x)/(d - c) })})
+  return u.max(0, u.min( (x - a)/(b - a), 1, (d - x)/(d - c) ))
 end
 
 local function triangular(x, params)
@@ -21,7 +21,7 @@ local function triangular(x, params)
 
   local a, b, c = table.unpack(params, 1, 3)
 
-  return u.max({0, u.min({ (x - a)/(b - a), (c - x)/(c - b) })})
+  return u.max(0, u.min( (x - a)/(b - a), (c - x)/(c - b) ))
 end
 
 return {
