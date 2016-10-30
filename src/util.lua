@@ -46,10 +46,12 @@ local function bound(x, a, b)
 end
 
 return {
-  bound = bound,
-  min = min,
-  max = max,
-  head = head,
-  tail = tail,
-  reduce = reduce,
+  min     = min,
+  max     = max,
+  minimum = minimum,
+  maximum = maximum,
+  bound   = bound,
+  head    = head,
+  tail    = tail,
+  reduce  = reduce,
 }
