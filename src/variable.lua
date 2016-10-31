@@ -2,13 +2,20 @@ local terms = require 'src.term'
 
 local add_term, evaluate, to_string
 
-local function create_variable(name, min, max)
+local function create_variable(name, min, max, discrete_points)
   local variable = {
     name  = name or '',
     min   = min  or 0.0,
-    max   = max  or 100.0,
+    max   = max  or 10.0,
     terms = {}
   }
+
+  -- the number of discretization points defaults to range
+  variable.range = variable.max - variable.min
+  variable.disc  = discrete_points or variable.range
+  -- discretization step defines the distance between two
+  -- points next to each other
+  variable.step  = variable.range/variable.disc
 
   variable.add_term  = add_term(variable)
   variable.evaluate  = evaluate(variable)

@@ -28,8 +28,8 @@ local function create_engine(name)
   end
 
   local function add_variable(variable_table)
-    return function(name, min, max)
-      local variable = variables.create_variable(name, min, max)
+    return function(name, min, max, disc)
+      local variable = variables.create_variable(name, min, max, disc)
 
       insert_variable(variable_table, variable)
 
