@@ -4,7 +4,7 @@
 
 
 local fis = require 'init'
-local fn = require 'src.membership_functions'
+local fn  = fis.mfn
 
 local engine = fis.create_engine('tipper')
 
