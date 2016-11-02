@@ -1,4 +1,4 @@
-local terms = require 'src.term'
+local terms = require 'term'
 
 local add_term, evaluate, to_string
 

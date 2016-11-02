@@ -1,6 +1,7 @@
-local variables = require 'src.variable'
+local variables = require 'variable'
 
 local function create_engine(name)
+  -- initialize internal state
   local state = {
     name    = name or '',
     inputs  = {},

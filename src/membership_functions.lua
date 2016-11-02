@@ -1,4 +1,4 @@
-local util = require 'src.util'
+local util = require 'util'
 
 local function gaussmf(x, params)
   if x == 'name' then return 'gaussian' end
