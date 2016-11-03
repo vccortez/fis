@@ -1,4 +1,4 @@
-local terms = require 'term'
+local terms = require 'terms'
 
 local add_term, evaluate, to_string
 
