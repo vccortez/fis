@@ -6,7 +6,8 @@
 local fis = require 'init'
 local fn = fis.mfn
 local op = fis.ops
-local If = fis.props.create_proposition
+local If = fis.rules.build_rule
+local P = fis.props.create_proposition
 
 local engine = fis.create_engine{'tipper', op.Min, op.Max, op.Not}
 
@@ -24,8 +25,8 @@ local tip = engine.add_output('tip', 0., 30.)
   .add_term('average', fn.trimf, {10., 15., 20.})
   .add_term('generous', fn.trimf, {20., 25., 30.})
 
-local rules = {
-  engine.add_rule().add_antecedent(If(service, 'poor') & If(food, 'rancid'))
+local rules = engine.add_rules{
+  If( (P(service, 'poor') & P(food, 'rancid')) ).Then{{tip, 'cheap'}},
 }
 
 --[[

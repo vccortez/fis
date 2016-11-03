@@ -41,22 +41,24 @@ local function create_engine(params)
     end
   end
 
-  local function add_rule(weight)
-    local rule = rules.create_rule(weight)
+  local function add_rules(rules)
+    for i, v in ipairs(rules) do
+      table.insert(state.rules, v)
+    end
 
-    table.insert(state.rules, rule)
-
-    return rule
+    return rules
   end
 
   local function to_string()
     local str = {}
 
     table.insert(str, ('fuzzy inference system %q'):format(state.name))
-    table.insert(str, ('number of inputs: %s'):format(#state.inputs))
+    table.insert(str, ('number of inputs: %d'):format(#state.inputs))
     for _, v in ipairs(state.inputs) do table.insert(str, v.to_string()) end
-    table.insert(str, ('number of outputs: %s'):format(#state.outputs))
+    table.insert(str, ('number of outputs: %d'):format(#state.outputs))
     for _, v in ipairs(state.outputs) do table.insert(str, v.to_string()) end
+    table.insert(str, ('number of rules: %d'):format(#state.rules))
+    for _, v in ipairs(state.rules) do table.insert(str, ('%s'):format(v) ) end
 
     return table.concat(str, '\n')
   end
@@ -64,7 +66,7 @@ local function create_engine(params)
   return {
     add_input  = add_variable(state.inputs),
     add_output = add_variable(state.outputs),
-    add_rule   = add_rule,
+    add_rules  = add_rules,
     to_string  = to_string,
   }
 end
