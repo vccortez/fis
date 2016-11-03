@@ -1,12 +1,15 @@
-local variables = require 'variable'
+local variables = require 'variables'
+local rules     = require 'rules'
 
-local function create_engine(name)
+local function create_engine(params)
+  local name, cnj, dsj, neg = table.unpack(params)
   -- initialize internal state
   local state = {
     name    = name or '',
     inputs  = {},
     outputs = {},
     rules   = {},
+    ops     = {cnj, dsj, neg},
   }
 
   local function insert_variable(variable_table, variable)
@@ -38,6 +41,14 @@ local function create_engine(name)
     end
   end
 
+  local function add_rule(weight)
+    local rule = rules.create_rule(weight)
+
+    table.insert(state.rules, rule)
+
+    return rule
+  end
+
   local function to_string()
     local str = {}
 
@@ -53,6 +64,7 @@ local function create_engine(name)
   return {
     add_input  = add_variable(state.inputs),
     add_output = add_variable(state.outputs),
+    add_rule   = add_rule,
     to_string  = to_string,
   }
 end
