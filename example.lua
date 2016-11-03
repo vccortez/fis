@@ -4,9 +4,11 @@
 
 
 local fis = require 'init'
-local fn  = fis.mfn
+local fn = fis.mfn
+local op = fis.ops
+local If = fis.props.create_proposition
 
-local engine = fis.create_engine('tipper')
+local engine = fis.create_engine{'tipper', op.Min, op.Max, op.Not}
 
 local service = engine.add_input('service', 0., 10.)
   .add_term('poor', fn.gaussmf, {1.5, 0.})
@@ -22,6 +24,11 @@ local tip = engine.add_output('tip', 0., 30.)
   .add_term('average', fn.trimf, {10., 15., 20.})
   .add_term('generous', fn.trimf, {20., 25., 30.})
 
+local rules = {
+  engine.add_rule().add_antecedent(If(service, 'poor') & If(food, 'rancid'))
+}
+
+--[[
 io.write'type a value to evaluate service: '
 local i = tonumber(io.read())
 
@@ -32,5 +39,6 @@ for k, v in pairs(service.evaluate(i)) do
 end
 
 -- food:evaluate(10)
+]]
 
--- print(engine.to_string())
+print(engine.to_string())

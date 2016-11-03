@@ -1,28 +1,47 @@
 local evaluate
 
-local function create_simple_proposition(variable, term, is_negative)
+-- this proposition metatable will
+-- combine propositions into expressions
+local prop_mt = {
+  -- bitwise and `&`
+  __band = function(lhs, rhs)
+    return setmetatable({
+        category = 'complex',
+        lhs = lhs,
+        rhs = rhs,
+        operator = 'and',
+      }, prop_mt)
+  end,
+  -- bitwise or `|`
+  __bor = function(lhs, rhs)
+    return setmetatable({
+        category = 'complex',
+        lhs = lhs,
+        rhs = rhs,
+        operator = 'or',
+      }, prop_mt)
+  end,
+  -- bitwise not `~`
+  __bnot = function(lhs)
+    return setmetatable({
+        category = 'complex',
+        lhs = lhs,
+        operator = 'not',
+      }, prop_mt)
+  end,
+  __metatable = {},
+}
+
+local function create_proposition(variable, term)
   local proposition = {
     category = 'simple',
     variable = variable,
-    term     = term,
-    operator = is_negative and true,
+    term = term,
   }
 
-  proposition.evaluate = evaluate(proposition)
-end
-
-function evaluate(proposition)
-  return function(input)
-    local value = proposition.variable.evaluate(input, proposition.term)
-
-    if proposition.operator then
-      -- apply complement operator to value
-    end
-
-    return value
-  end
+  return setmetatable(proposition, prop_mt)
 end
 
 return {
-  create_simple_proposition = create_simple_proposition,
+  create_proposition = create_proposition,
 }
