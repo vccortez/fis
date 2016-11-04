@@ -1,34 +1,31 @@
-local to_string
+local term_mt
 
 local function create_term(name, mf, params)
   local term = {
-    name   = name or '',
-    mf     = mf,
+    name = name or '',
+    mf = mf,
     params = params,
   }
 
-  term.to_string = to_string(term)
-
-  return term
+  return setmetatable(term, term_mt)
 end
 
-function to_string(self)
-  return function()
-    local s = {}
+term_mt = {
+  __tostring = function(v)
+    local input = (function()if v.latest_input then return('%.2f'):format(v.latest_input)else return'not set'end end)()
+    local value = (function()if v.latest_value then return('%.2f'):format(v.latest_value)else return'not set'end end)()
 
-    local input = (function()if self.latest_input then return('%.2f'):format(self.latest_input)else return'not set'end end)()
-    local value = (function()if self.latest_value then return('%.2f'):format(self.latest_value)else return'not set'end end)()
-
-    table.insert(s, ('term %q'):format(self.name))
-    table.insert(s, ('membership function: %s'):format(self.mf('name')))
-    table.insert(s, ('parameters: %s'):format(table.concat(self.params, ', ')))
-    table.insert(s, ('latest input: %s'):format(input))
-    table.insert(s, ('latest value: %s'):format(value))
+    local s = {
+      ('term %q'):format(v.name),
+      ('membership function: %s'):format(v.mf('name')),
+      ('parameters: [ %s ]'):format(table.concat(v.params, ', ')),
+      ('latest input: %s'):format(input),
+      ('latest value: %s'):format(value),
+    }
 
     return table.concat(s, '\n')
   end
-end
-
+}
 
 return {
   create_term = create_term,

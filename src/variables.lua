@@ -1,27 +1,26 @@
 local terms = require 'terms'
 
-local add_term, evaluate, to_string
+local add_term, evaluate, variable_mt
 
 local function create_variable(name, min, max, discrete_points)
   local variable = {
-    name  = name or '',
-    min   = min  or 0.0,
-    max   = max  or 10.0,
+    name = name or '',
+    min = min or 0.0,
+    max = max or 10.0,
     terms = {}
   }
 
   -- the number of discretization points defaults to range
   variable.range = variable.max - variable.min
-  variable.disc  = discrete_points or variable.range
+  variable.disc = discrete_points or variable.range
   -- discretization step defines the distance between two
   -- points next to each other
-  variable.step  = variable.range/variable.disc
+  variable.step = variable.range/variable.disc
 
-  variable.add_term  = add_term(variable)
-  variable.evaluate  = evaluate(variable)
-  variable.to_string = to_string(variable)
+  variable.add_term = add_term(variable)
+  variable.evaluate = evaluate(variable)
 
-  return variable
+  return setmetatable(variable, variable_mt)
 end
 
 function add_term(self)
@@ -52,19 +51,20 @@ function evaluate(self)
   end
 end
 
-function to_string(self)
-  return function()
-    local s = {}
+variable_mt = {
+  __tostring = function(v)
+    local s = {
+      ('variable %q'):format(v.name),
+      ('range: [%d-%d]'):format(v.min, v.max)
+    }
 
-    table.insert(s, ('variable %q'):format(self.name))
-    table.insert(s, ('range: [%d-%d]'):format(self.min, self.max))
-
-    for _, v in pairs(self.terms) do table.insert(s, v.to_string()) end
+    for _, v in pairs(v.terms) do
+      table.insert(s, ('%s'):format(v))
+    end
 
     return table.concat(s, '\n')
-  end
-end
-
+  end,
+}
 
 return {
   create_variable = create_variable,

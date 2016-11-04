@@ -1,15 +1,15 @@
 local variables = require 'variables'
-local rules     = require 'rules'
+local rules = require 'rules'
 
 local function create_engine(params)
   local name, cnj, dsj, neg = table.unpack(params)
   -- initialize internal state
   local state = {
-    name    = name or '',
-    inputs  = {},
+    name = name or '',
+    inputs = {},
     outputs = {},
-    rules   = {},
-    ops     = {cnj, dsj, neg},
+    rules = {},
+    ops = {cnj, dsj, neg},
   }
 
   local function insert_variable(variable_table, variable)
@@ -49,26 +49,33 @@ local function create_engine(params)
     return rules
   end
 
-  local function to_string()
-    local str = {}
+  local engine_mt = {
+    __tostring = function(_)
+      local s = {
+        ('fuzzy inference system %q'):format(state.name),
+        ('number of inputs: %d'):format(#state.inputs),
+      }
+      for _, v in ipairs(state.inputs) do
+        table.insert(s, ('%s'):format(v))
+      end
+      table.insert(s, ('number of outputs: %d'):format(#state.outputs))
+      for _, v in ipairs(state.outputs) do
+        table.insert(s, ('%s'):format(v))
+      end
+      table.insert(s, ('number of rules: %d'):format(#state.rules))
+      for _, v in ipairs(state.rules) do
+        table.insert(s, ('%s'):format(v))
+      end
 
-    table.insert(str, ('fuzzy inference system %q'):format(state.name))
-    table.insert(str, ('number of inputs: %d'):format(#state.inputs))
-    for _, v in ipairs(state.inputs) do table.insert(str, v.to_string()) end
-    table.insert(str, ('number of outputs: %d'):format(#state.outputs))
-    for _, v in ipairs(state.outputs) do table.insert(str, v.to_string()) end
-    table.insert(str, ('number of rules: %d'):format(#state.rules))
-    for _, v in ipairs(state.rules) do table.insert(str, ('%s'):format(v) ) end
-
-    return table.concat(str, '\n')
-  end
-
-  return {
-    add_input  = add_variable(state.inputs),
-    add_output = add_variable(state.outputs),
-    add_rules  = add_rules,
-    to_string  = to_string,
+      return table.concat(s, '\n')
+    end,
   }
+
+  return setmetatable({
+      add_input = add_variable(state.inputs),
+      add_output = add_variable(state.outputs),
+      add_rules = add_rules,
+    }, engine_mt)
 end
 
 return {
