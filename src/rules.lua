@@ -1,7 +1,7 @@
 local propositions = require 'propositions'
 
 local rule_mt, cnt_mt
-local add_antecedent, add_consequent, get_activation_degree
+local add_antecedent, add_consequent, get_activation_degree, get_output_set
 
 local function create_rule(weight)
   local rule = {weight = weight or 1.0}
@@ -9,6 +9,7 @@ local function create_rule(weight)
   rule.add_antecedent = add_antecedent(rule)
   rule.add_consequent = add_consequent(rule)
   rule.get_activation_degree = get_activation_degree(rule)
+  rule.get_output_set = get_output_set(rule)
 
   return setmetatable(rule, rule_mt)
 end
@@ -49,6 +50,25 @@ function get_activation_degree(rule)
     end
 
     return eval(rule.antecedent)
+  end
+end
+
+function get_output_set(self)
+  return function(degree, Impl, base_set)
+    local outputs = {}
+
+    for _, cons in ipairs(self.consequent) do
+      local var, term = table.unpack(cons)
+      outputs[var.name] = {}
+
+      for i, elem in ipairs(base_set[var.name][term]) do
+        local x, x_degree = table.unpack(elem)
+
+        outputs[var.name][i] = { x, Impl(x_degree, degree) }
+      end
+    end
+
+    return outputs
   end
 end
 
