@@ -1,12 +1,12 @@
 local util = require 'util'
 
-local tnorms, snorms, complement = {}, {}, {}
+local tnorm, snorm, complement = {}, {}, {}
 
-function tnorms.Min(a, b)
+function tnorm.Min(a, b)
   return util.minimum(a, b)
 end
 
-function snorms.Max(a, b)
+function snorm.Max(a, b)
   return util.maximum(a, b)
 end
 
@@ -14,4 +14,8 @@ function complement.Not(a)
   return 1.0 - a
 end
 
-return {tnorms, snorms, complement}
+return {
+  tnorms = tnorm,
+  snorms = snorm,
+  complement = complement,
+}
