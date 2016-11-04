@@ -1,12 +1,14 @@
 local propositions = require 'propositions'
 
-local add_antecedent, add_consequent, rule_mt, cnt_mt
+local rule_mt, cnt_mt
+local add_antecedent, add_consequent, get_activation_degree
 
 local function create_rule(weight)
   local rule = {weight = weight or 1.0}
 
   rule.add_antecedent = add_antecedent(rule)
   rule.add_consequent = add_consequent(rule)
+  rule.get_activation_degree = get_activation_degree(rule)
 
   return setmetatable(rule, rule_mt)
 end
@@ -24,6 +26,29 @@ function add_consequent(rule)
     rule.consequent = setmetatable(outputs, cnt_mt)
 
     return rule
+  end
+end
+
+function get_activation_degree(rule)
+  return function(inputs, And, Or, Not)
+    -- evaluates propositions
+    local function eval(p)
+      if p.category == 'simple' then
+        local term = p.variable.terms[p.term]
+        return term.mf(inputs[p.variable.name], term.params)
+      elseif p.operator == 'not' then
+        return Not(eval(p.lhs))
+      else
+        local lhs, rhs = eval(p.lhs), eval(p.rhs)
+        if p.operator == 'and' then
+          return And(lhs, rhs)
+        else
+          return Or(lhs, rhs)
+        end
+      end
+    end
+
+    return eval(rule.antecedent)
   end
 end
 
