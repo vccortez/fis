@@ -12,11 +12,14 @@ local function create_engine(params)
     conjunction = op.tnorms.Min,
     disjunction = op.snorms.Max,
     complement = op.complement.Not,
+    implication = op.tnorms.Min,
+    aggregation = op.snorms.Max,
+    defuzzification = op.defuzz.centroid,
   }
 
   -- verify parameters and overwrite state
   if params then
-    local keys = {'name', 'conjunction', 'disjunction', 'complement', 'implication', 'aggregation'}
+    local keys = {'name', 'conjunction', 'disjunction', 'complement', 'implication', 'aggregation', 'defuzzification'}
 
     for _, key in ipairs(keys) do
       if params[key] then
