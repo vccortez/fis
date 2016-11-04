@@ -10,12 +10,12 @@ local function create_variable(name, min, max, discrete_points)
     terms = {}
   }
 
-  -- the number of discretization points defaults to range
+  -- the number of discretization points defauts to the variable range + 1
   variable.range = variable.max - variable.min
-  variable.disc = discrete_points or variable.range
-  -- discretization step defines the distance between two
-  -- points next to each other
-  variable.step = variable.range/variable.disc
+  variable.disc = discrete_points or variable.range + 1
+  -- `n` discrete points divide the range in `n - 1` parts
+  -- the discretization step defines the distance between two points
+  variable.step = variable.range / (variable.disc - 1)
 
   variable.add_term = add_term(variable)
   variable.evaluate = evaluate(variable)
