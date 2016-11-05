@@ -1,71 +1,33 @@
-local terms = require 'terms'
+local VariableFactory = require 'factory'()
 
-local add_term, evaluate, variable_mt
+function VariableFactory:build(name, min, max, discrete_points)
+  self.name = name or ''
+  self.min = min or 0.0
+  self.max = max or 10.0
+  self.terms = {}
 
-local function create_variable(name, min, max, discrete_points)
-  local variable = {
-    name = name or '',
-    min = min or 0.0,
-    max = max or 10.0,
-    terms = {}
+  self.range = self.max - self.min
+  self.disc = discrete_points or self.range + 1
+  self.step = self.range / (self.disc - 1)
+end
+
+function VariableFactory:add_term(term)
+  self.terms[term.name] = term
+
+  return self
+end
+
+function VariableFactory:__tostring()
+  local s = {
+    ('variable %q'):format(self.name),
+    ('range: [%d-%d]'):format(self.min, self.max),
   }
 
-  -- the number of discretization points defauts to the variable range + 1
-  variable.range = variable.max - variable.min
-  variable.disc = discrete_points or variable.range + 1
-  -- `n` discrete points divide the range in `n - 1` parts
-  -- the discretization step defines the distance between two points
-  variable.step = variable.range / (variable.disc - 1)
-
-  variable.add_term = add_term(variable)
-  variable.evaluate = evaluate(variable)
-
-  return setmetatable(variable, variable_mt)
-end
-
-function add_term(self)
-  return function(name, mf, params)
-    local term = terms.create_term(name, mf, params)
-
-    self.terms[term.name] = term
-
-    return self
+  for _, term in pairs(self.terms) do
+    table.insert(s, ('%s'):format(term))
   end
+
+  return table.concat(s, '\n')
 end
 
-function evaluate(self)
-  return function(input)
-    local values = {}
-
-    for name, term in pairs(self.terms) do
-      local value = term.mf(input, term.params)
-
-      term.latest_input = input
-      term.latest_value = value
-
-      table.insert(values, value)
-      values[name] = value
-    end
-
-    return values
-  end
-end
-
-variable_mt = {
-  __tostring = function(v)
-    local s = {
-      ('variable %q'):format(v.name),
-      ('range: [%d-%d]'):format(v.min, v.max)
-    }
-
-    for _, v in pairs(v.terms) do
-      table.insert(s, ('%s'):format(v))
-    end
-
-    return table.concat(s, '\n')
-  end,
-}
-
-return {
-  create_variable = create_variable,
-}
+return VariableFactory

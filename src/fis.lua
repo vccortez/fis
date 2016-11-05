@@ -1,9 +1,12 @@
-local fis = require 'engine'
+local fis = {}
 
-fis.mfn = require 'membership_functions'
-fis.ops = require 'operators'
+fis.Engine = require 'engine'
+fis.Variables = require 'variables'
+fis.Terms = require 'terms'
+fis.Membership = require 'membership_functions'
+fis.Operators = require 'operators'
 
-fis.rules = require 'rules'
-fis.props = require 'propositions'
+fis.Rules = require 'rules'
+fis.Propositions = require 'propositions'
 
 return fis
