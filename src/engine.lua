@@ -35,6 +35,14 @@ end
 function EngineFactory:process(crips_inputs)
   local original_output_set, truncated_output_set = {}, {}
 
+  -- bounds crisp inputs to variable range
+  for name, value in pairs(crips_inputs) do
+    local input = self.inputs[name]
+    local lower_bound, upper_bound = input.min, input.max
+
+    crips_inputs[name] = util.bound(value, lower_bound, upper_bound)
+  end
+
   -- calculate the original output sets
   for _, output in ipairs(self.outputs) do
     original_output_set[output.name] = {}
@@ -64,6 +72,7 @@ function EngineFactory:process(crips_inputs)
     truncated_output_set[i] = rule.get_output_set(activation_degree[i], self.implication, original_output_set)
   end
 
+  --[[
   for i, v in ipairs(truncated_output_set) do
     io.write('\nrule: ' .. i)
 
@@ -75,6 +84,7 @@ function EngineFactory:process(crips_inputs)
     end
     io.write('\n')
   end
+  ]]
 
   local aggregated = {}
   for _, out in ipairs(self.outputs) do
@@ -98,6 +108,7 @@ function EngineFactory:process(crips_inputs)
     end
   end
 
+  --[[
   for vname, set in pairs(aggregated) do
     io.write('\naggregated set of ' .. vname .. '\n')
 
@@ -106,13 +117,14 @@ function EngineFactory:process(crips_inputs)
     end
     io.write('\n')
   end
+  ]]
 
   local crisp_outputs = {}
   for key, set in pairs(aggregated) do
     crisp_outputs[key] = self.defuzzification(set)
   end
 
-  return crisp_outputs
+  return crisp_outputs, aggregated
 end
 
 function EngineFactory:__tostring()
