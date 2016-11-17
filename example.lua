@@ -2,6 +2,8 @@
 -- runs the classic tipping fuzzy inference system
 -- --------------------------------------------------------
 
+local flot = require 'flot'
+
 local fis = require 'init'
 local fn = fis.Membership
 local E = fis.Engine.create
@@ -37,10 +39,12 @@ print'type service input [0-10]'
 local serv = tonumber(io.read())
 print'type food input [0-10]'
 local food = tonumber(io.read())
-local outputs = engine:process{service = serv, food = food}
+local outputs, set = engine:process{service = serv, food = food}
 
-for k, v in pairs(outputs) do
-  print(k, v)
-end
+local p = flot.Plot {
+  legend = { position = 'se' },
+}
 
-print(engine)
+p:add_series(tip.name, set[tip.name])
+
+flot.render(p)
