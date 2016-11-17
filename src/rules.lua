@@ -36,7 +36,10 @@ function get_activation_degree(rule)
     local function eval(p)
       if p.category == 'simple' then
         local term = p.variable.terms[p.term]
-        return term.mf(inputs[p.variable.name], term.params)
+        term.latest_input = inputs[p.variable.name]
+        local result = term.mf(inputs[p.variable.name], term.params)
+        term.latest_value = result
+        return result
       elseif p.operator == 'not' then
         return Not(eval(p.lhs))
       else
