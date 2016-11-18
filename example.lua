@@ -24,7 +24,7 @@ local food = engine:add_input(V('food', 0., 10., 11))
   :add_term(T('average', fn.trimf, {0., 5., 10.}))
   :add_term(T('delicious', fn.trimf, {5., 10., 10.}))
 
-local tip = engine:add_output(V('tip', 0., 25., 26))
+local tip = engine:add_output(V('tip', 0., 25., 101))
   :add_term(T('cheap', fn.trimf, {0., 0., 13.}))
   :add_term(T('average', fn.trimf, {0., 13., 25.}))
   :add_term(T('generous', fn.trimf, {13., 25., 25.}))
@@ -42,7 +42,10 @@ local food = tonumber(io.read())
 local outputs, set = engine:process{service = serv, food = food}
 
 local p = flot.Plot {
+  doctitle = 'Tipper Example',
+  filename = 'tipper-example',
   legend = { position = 'se' },
+  yaxis = { min = 0.0, max = 1.0 },
 }
 
 p:add_series(tip.name, set[tip.name])
