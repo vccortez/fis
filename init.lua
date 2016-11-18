@@ -1,5 +1,5 @@
-local req = require
+local dir, req = (...):match("(.-)[^%.]+$"), require
 
-require = function(path) return req('src.' .. path) end
+require = function(path) return req(dir..'src.'..path) end
 
 return require 'fis'
