@@ -5,6 +5,7 @@ local EngineFactory = require 'factory'()
 local insert_variable
 
 function EngineFactory:build(args)
+  args = args or {}
   self.name = args.name or ''
   self.inputs, self.outputs, self.rules = {}, {}, {}
   self.conjunction = args.conjunction or op.tnorms.Min
