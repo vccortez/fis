@@ -3,10 +3,11 @@
 -- --------------------------------------------------------
 
 local fis = require 'init'
+
 local fn = fis.Membership
-local E = fis.Engine.create
-local V = fis.Variables.create
-local T = fis.Terms.create
+local E = fis.Engine
+local V = fis.Variables
+local T = fis.Terms
 local If = fis.Rules.build_rule
 local P = fis.Propositions.create_proposition
 

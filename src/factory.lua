@@ -1,5 +1,5 @@
 local function factory(proto_chain)
-  local proto = {}
+  local proto, base = {}, {}
 
   proto.__index = proto
 
@@ -13,7 +13,13 @@ local function factory(proto_chain)
     return instance
   end
 
-  return setmetatable(proto, proto_chain)
+  function base.__call(_, ...)
+    return proto.create(...)
+  end
+
+  setmetatable(base, proto_chain)
+
+  return setmetatable(proto, base)
 end
 
 return factory
