@@ -1,3 +1,4 @@
+-- TODO: update file to use `./factory.lua`
 local propositions = require 'propositions'
 
 local rule_mt, cnt_mt

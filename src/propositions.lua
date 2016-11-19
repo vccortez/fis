@@ -1,3 +1,4 @@
+-- TODO: update file to use `./factory.lua`
 local evaluate, prop_mt
 
 local function create_proposition(variable, term)
