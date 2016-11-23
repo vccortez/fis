@@ -1,8 +1,7 @@
 local op = require 'operators'
 local util = require 'util'
 
-local EngineFactory = require 'factory'()
-local insert_variable
+local EngineFactory = require 'factory' ()
 
 function EngineFactory:build(args)
   args = args or {}
@@ -15,6 +14,8 @@ function EngineFactory:build(args)
   self.aggregation = args.aggregation or op.snorms.Max
   self.defuzzification = args.defuzzification or op.defuzz.centroid
 end
+
+local insert_variable
 
 function EngineFactory:add_input(variable)
   insert_variable(self.inputs, variable)
@@ -33,59 +34,24 @@ function EngineFactory:add_rules(rules)
   return rules
 end
 
-function EngineFactory:process(crips_inputs)
-  local original_output_set, truncated_output_set = {}, {}
+local bound_inputs, generate_default_outputs
 
-  -- bounds crisp inputs to variable range
-  for name, value in pairs(crips_inputs) do
-    local input = self.inputs[name]
-    local lower_bound, upper_bound = input.min, input.max
-
-    crips_inputs[name] = util.bound(value, lower_bound, upper_bound)
+function EngineFactory:process(crisp_inputs)
+  
+  bound_inputs(self, crisp_inputs)
+  
+  if not self._cached_outputs then
+    generate_default_outputs(self)
   end
+  
+  local original_output_set = self._cached_outputs
 
-  -- calculate the original output sets
-  for _, output in ipairs(self.outputs) do
-    original_output_set[output.name] = {}
-
-    -- generate the set with each discrete points
-    local discrete_set = {}
-    for i = 0, output.disc - 1 do
-      discrete_set[i + 1] = (i * output.step) + output.min
-    end
-
-    -- generate each term's fuzzy set
-    for term_name, term in pairs(output.terms) do
-      local term_set = {}
-
-      for i, val in ipairs(discrete_set) do
-        term_set[i] = { val, term.mf(val, term.params) }
-      end
-
-      original_output_set[output.name][term_name] = term_set
-    end
-  end
-
-  local activation_degree = {}
+  local activation_degree, truncated_output_set = {}, {}
   for i, rule in ipairs(self.rules) do
-    activation_degree[i] = rule.get_activation_degree(crips_inputs, self.conjunction, self.disjunction, self.complement)
+    activation_degree[i] = rule.get_activation_degree(crisp_inputs, self.conjunction, self.disjunction, self.complement)
 
     truncated_output_set[i] = rule.get_output_set(activation_degree[i], self.implication, original_output_set)
   end
-
-  --[[
-  for i, v in ipairs(truncated_output_set) do
-    io.write('\nrule: ' .. i)
-
-    for varn, set in pairs(v) do
-      io.write('\nvar name: ' .. varn ..'\n')
-      for j, elem in ipairs(set) do
-        io.write('#'..j..' = ('..elem[1]..' / '..elem[2]..'), ')
-      end
-    end
-    io.write('\n')
-  end
-  ]]
 
   local aggregated = {}
   for _, out in ipairs(self.outputs) do
@@ -109,23 +75,53 @@ function EngineFactory:process(crips_inputs)
     end
   end
 
-  --[[
-  for vname, set in pairs(aggregated) do
-    io.write('\naggregated set of ' .. vname .. '\n')
-
-    for j, elem in ipairs(set) do
-      io.write('#'..j..' = ('..elem[1]..' / '..elem[2]..'), ')
-    end
-    io.write('\n')
-  end
-  ]]
-
   local crisp_outputs = {}
   for key, set in pairs(aggregated) do
     crisp_outputs[key] = self.defuzzification(set)
   end
 
   return crisp_outputs, aggregated
+end
+
+--- bounds a set of crisp inputs to its range.
+-- input values must be indexed by name.
+-- @param self the engine instance
+-- @param inputs the input table
+function bound_inputs(self, inputs)
+  for name, value in pairs(inputs) do
+    local input = self.inputs[name]
+    local lower_bound, upper_bound = input.min, input.max
+
+    inputs[name] = util.bound(value, lower_bound, upper_bound)
+  end
+end
+
+--- generates the rule's unchanged outputs.
+-- @param self the engine instance
+function generate_default_outputs(self)
+  local original_output_set = {}
+  -- calculate the original output sets
+  for _, output in ipairs(self.outputs) do
+    original_output_set[output.name] = {}
+
+    local discrete_set = {}
+    -- generate the set with each discrete points
+    for i = 0, output.disc - 1 do
+      discrete_set[i + 1] = (i * output.step) + output.min
+    end
+
+    -- generate each term's fuzzy set
+    for term_name, term in pairs(output.terms) do
+      local term_set = {}
+
+      for i, val in ipairs(discrete_set) do
+        term_set[i] = { val, term.mf(val, term.params) }
+      end
+
+      original_output_set[output.name][term_name] = term_set
+    end
+  end
+  self._cached_outputs = original_output_set
 end
 
 function EngineFactory:__tostring()

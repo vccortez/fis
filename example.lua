@@ -40,8 +40,8 @@ print'type food input [0-10]'
 local food = tonumber(io.read())
 local outputs = engine:process{service = serv, food = food}
 
+print(engine)
+
 for k, v in pairs(outputs) do
   print(k, v)
 end
-
-print(engine)
