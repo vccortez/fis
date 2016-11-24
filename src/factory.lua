@@ -1,7 +1,12 @@
 local function factory(proto_chain)
   local proto, base = {}, {}
 
-  proto.__index = proto
+  function proto.__index(table, key)
+    if key ~= 'create' then
+      return proto[key]
+    end
+    return nil
+  end
 
   function proto.create(...)
     local instance = setmetatable({}, proto)
