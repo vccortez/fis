@@ -34,17 +34,17 @@ function EngineFactory:add_rules(rules)
   return rules
 end
 
-local bound_inputs, generate_default_outputs
+local bound_inputs
 
 function EngineFactory:process(crisp_inputs)
   
   bound_inputs(self, crisp_inputs)
   
-  if not self._cached_outputs then
-    generate_default_outputs(self)
+  if not self._consequents then
+    self:generate_rule_consequents()
   end
   
-  local original_output_set = self._cached_outputs
+  local original_output_set = self._consequents
 
   local activation_degree, truncated_output_set = {}, {}
   for i, rule in ipairs(self.rules) do
@@ -96,13 +96,17 @@ function bound_inputs(self, inputs)
   end
 end
 
---- generates the rule's unchanged outputs.
--- @param self the engine instance
-function generate_default_outputs(self)
-  local original_output_set = {}
+--- generates the original consequent of each rule.
+-- this function should be called if the engine
+-- updates dynamically.
+-- generally, you shouldn't update it dynamically
+-- as your fuzzy inference system should be ready
+-- to go after the initial configuration.
+function EngineFactory:generate_rule_consequents()
+  local consequents = {}
   -- calculate the original output sets
   for _, output in ipairs(self.outputs) do
-    original_output_set[output.name] = {}
+    consequents[output.name] = {}
 
     local discrete_set = {}
     -- generate the set with each discrete points
@@ -118,10 +122,10 @@ function generate_default_outputs(self)
         term_set[i] = { val, term.mf(val, term.params) }
       end
 
-      original_output_set[output.name][term_name] = term_set
+      consequents[output.name][term_name] = term_set
     end
   end
-  self._cached_outputs = original_output_set
+  self._consequents = consequents
 end
 
 function EngineFactory:__tostring()
